@@ -1,10 +1,12 @@
 <?php
 $experiment = $_GET['dir'];
 $condition = $_GET['cond'];
-
-$dir = opendir($experiment.'/'.$condition.'/');
-
-print $fname;
+require_once('utils.php');
+$experiment='Pilot';
+$condition='scatter';
+$dirname = $experiment.'/'.$condition;
+$fname = imgByIndex($dirname,rand(0,numImgs($dirname)-1));
+echo $fname;
 ?>
 
 

@@ -9,9 +9,10 @@
 <div id="circle1"></div>
 <div id="circle2"></div>
 <table id="question">
-<form>
-<tr><td colspan="2">Which point is more likely, given the data?</td></tr>
+<form id="questionForm" name="question" onsubmit="return validate()" method="post">
+<tr><td colspan="2">Which point is more likely, given the existing points?</td></tr>
 <tr><td id="left"><input id="green" type="radio" name="choice" value="-1" /><label for="green"> Green</label></td><label for="right"><td id="right"><input id="orange" type="radio" name="choice" value="1" /><label for="orange"> Orange</label></td></tr>
+<tr><td colspan="2"><input id="submit" type="submit" name="submit" value="Submit"/></td></tr>
 </table>
 </form>
 </div>
