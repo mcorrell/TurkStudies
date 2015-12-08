@@ -3,18 +3,26 @@
 <link rel="stylesheet" type="text/css" href="./style.css" />
 <script language="javascript" src="./scripts.js"></script>
 </head>
-<body>
-<div>
+<body onLoad="initialize()">
+<div id="questionBox">
+<div id="questionName">Question <span id="questionNum">1</span> / <span id="questionMax">40</span></div>
 <img id="stim" />
 <div id="circle1"></div>
 <div id="circle2"></div>
 <table id="question">
 <form id="questionForm" name="question" onsubmit="return validate()" method="post">
-<tr><td colspan="2">Which point is more likely, given the existing points?</td></tr>
+<!--<tr><td colspan="2">Which point is more likely, given the existing points?</td></tr>-->
 <tr><td id="left"><input id="green" type="radio" name="choice" value="-1" /><label for="green"> Green</label></td><label for="right"><td id="right"><input id="orange" type="radio" name="choice" value="1" /><label for="orange"> Orange</label></td></tr>
-<tr><td colspan="2"><input id="submit" type="submit" name="submit" value="Submit"/></td></tr>
+<tr><td colspan="2"></td></tr>
 </table>
+<input type="hidden" name="r1" id="r1" value="0" />
+<input type="hidden" name="r2" id="r2" value="0" />
+<input type="hidden" name="stim" id="stim" value="DEBUG" />
+<input type="hidden" name="x1" id="x1" value="0" />
+<input type="hidden" name="x2" id="x2" value="0" />
+<input type="hidden" name="questionId" id="questionId" value="1" />
 </form>
+<div id="questionText"><b>Which point is more likely, given the existing points?</b> <br /> Use <span class="green">left</span> or <span class="orange">right</span> arrow keys, or click the boxes, to make a selection.</div>
 </div>
 </body>
 </html>

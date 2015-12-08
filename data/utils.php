@@ -9,14 +9,14 @@
 $imgformat = ['n','m','s','mhat','b','r'];
 
 function parseImg($img){
-  $vars = split($img,'_');
+  $vars = explode('_',$img);
   $properties = [];
   $properties['n'] = substr($vars[0],1);
   $properties['m'] = substr($vars[1],1);
   $properties['s'] = substr($vars[2],1);
-  $properties['mh'] = substr($vars[3],1);
-  $properties['b'] = substr($vars[4],1);
-  $properties['r'] = substr($vars[5],1);
+  $properties['mh'] = substr($vars[3],2)/1000;
+  $properties['b'] = substr($vars[4],1)/1000;
+  $properties['r'] = substr($vars[5],1)/1000;
   return $properties; 
 }
 

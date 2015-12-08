@@ -1,3 +1,29 @@
+h3{
+  text-align: center;
+}
+
+#questionBox{
+  margin-left: auto;
+  margin-right: auto;
+  width:450px; 
+}
+
+#questionName{
+  text-align: center;
+  font-weight: bold;
+}
+
+#questionText{
+  text-align:center; 
+}
+
+.green {
+  color: #1b9e77; 
+}
+
+.orange {
+  color: #d95f02;
+}
 #circle1 {
   background: #1b9e77;
   height: 10px;
@@ -30,12 +56,24 @@
   background: #1b9e77;
   color: #fff;
   text-align: center;
+  border: 2px solid #fff;
+  border-radius: 5px;
+}
+
+#left:hover{
+  border: 2px solid #000;
 }
 
 #right{
   background: #d95f02;
   color: #fff;
   text-align: center;
+  border: 2px solid #fff;
+  border-radius: 5px;
+}
+
+#right:hover{
+  border: 2px solid #000;
 }
 
 label {
