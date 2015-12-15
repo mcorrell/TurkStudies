@@ -1,6 +1,12 @@
 var experiment = "Pilot";
+var conditions = ['scatter','scattertrend','trend'];
 var condition = "scatter";
-var questionMax = 56;
+var questionMax = 60;
+var enabled = false;
+var startTime;
+var questions = Array(questionMax);
+
+
 
 function gup(name){
   var regexS = "[\\?&]"+name+"=([^&#]*)";
@@ -15,9 +21,13 @@ function gup(name){
 
 function plotDot(x1,x2,r1,r2,m,b){
   document.getElementById('circle1').style.left= toScreenX(x1)-5+"px";
-  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-5+"px";
+  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-15+"px";
   document.getElementById('circle2').style.left = toScreenX(x2)-5+"px";
-  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-15+"px";
+  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-25+"px";
+}
+
+function RToY(r,x,m,b){
+  return r+(m*x)+b;
 }
 
 function toScreenX(x){
@@ -32,29 +42,46 @@ function toScreen(xy){
   return [toScreenX(xy[0]),toScreenY(xy[1])];
 }
 
+function clamp(num){
+  return Math.min(1,Math.max(0,num));
+}
+
+function parseImg(img){
+  var imgParts = img.split("_");
+  var properties = {};
+  properties.m = (imgParts[3].substr(2))/1000;
+  properties.b = (imgParts[4].substr(1))/1000;
+  return properties;
+}
+
 function receiveImg(){
-  //console.log(this.responseText);
   document.getElementById('stim').src = "data/"+experiment+"/"+condition+"/"+this.responseText;
   document.getElementById("questionForm")["stim"].value = this.responseText;
+  //console.log(this.responseText); 
   var x1 = 0,
   x2 = 0,
   r1 = 0,
-  r2 = 0;
+  r2 = 0,
+  stim = parseImg(this.responseText);
   while(screenDist(x1,r1,x2,r2)<10){
-   x1 = Math.random(1);
-   x2 = Math.random(1);
-   r1 = Math.random(1);
-   r2 = Math.random(1);
+   x1 = clamp((Math.random()*0.5)+0.25);
+   x2 = clamp((Math.random()*0.5)+0.25);
+   //r1 = RToY(0,x1,stim.m,stim.b);
+   //r2 = RToY(0,x2,stim.m,stim.b);
+   r1 = clamp(RToY(Math.random()-0.5,x1,stim.m,stim.b));
+   r2 = clamp(RToY(Math.random()-0.5,x2,stim.m,stim.b));
+   //console.log("("+x1+","+r1+")"+" ("+x2+","+r2+")");
   }
   document.getElementById("circle1").style.left = toScreenX(x1);
-  document.getElementById("circle1").style.top = toScreenY(r1) - 10;
+  document.getElementById("circle1").style.top = toScreenY(r1)-15;
   document.getElementById("circle2").style.left = toScreenX(x2);
-  document.getElementById("circle2").style.top = toScreenY(r2) - 20;
+  document.getElementById("circle2").style.top = toScreenY(r2)-25;
   document.getElementById("questionForm")["r1"].value = r1;
   document.getElementById("questionForm")["r2"].value = r2;
   document.getElementById("questionForm")["x1"].value = x1;
   document.getElementById("questionForm")["x2"].value = x2;
-  
+  enabled = true;
+  startTime = (new Date()).getTime(); 
 }
 
 function screenDist(x1,y1,x2,y2){
@@ -89,6 +116,10 @@ function validate(){
 }
 
 
+function rndCondition(){
+  return conditions[Math.floor(Math.random()*conditions.length)];
+}
+
 function initialize(){
   document.addEventListener("keydown",keyPressed);
   document.getElementById("left").addEventListener("click",clickLeft);
@@ -97,14 +128,41 @@ function initialize(){
   getRndImg();
 }
 
-function getRndImg(){  
+function getRndImg(){ 
+  condition = rndCondition(); 
   var imgRequest = new XMLHttpRequest();
   imgRequest.open("GET","data/genStimuli.php?experiment="+experiment+"&condition="+condition,true);
   imgRequest.addEventListener("load",receiveImg);
   imgRequest.send();
 }
 
+function permute(anArray){
+  //Knuth shuffle
+  var j = 0;
+  var temp;
+  var tempArray = anArray.slice(0);
+  for(var i = 0;i<anArray.length;i++){
+    j = Math.floor(Math.random()*i);
+    temp = tempArray[j];
+    tempArray[j] = tempArray[i];
+    tempArray[i] = temp;
+  }
+ return tempArray; 
+}
+
+function rndStimuli(){
+  // Things to control for:
+  // Number of "same side" vs. opposite side comparisons
+  // Scatter/scattertrend/trend
+  // 60 stim = 20 per scatter, 10 per scatter per side.
+  // Only allow xs in [-0.5,0.5], rs in the same range.
+    
+  
+  questions = permute(questions);
+}
+
 function writeAnswer(){
+  var rt = (new Date()).getTime() - startTime;
   var answer = document.getElementById("questionForm")["choice"].value;
   if(!id){
     var id = "DEBUG";
@@ -116,7 +174,7 @@ function writeAnswer(){
   var x2 = document.getElementById("questionForm")["x2"].value;
   var stim = document.getElementById("questionForm")["stim"].value;
   var writeRequest = new XMLHttpRequest();
-  var writeString = "data/write.php?workerID="+id+"&experiment="+experiment+"&condition="+condition+"&n="+questionNum+"&stim="+stim+"&answer="+answer+"&r1="+r1+"&r2="+r2+"&x1="+x1+"&x2="+x2;
+  var writeString = "data/write.php?workerID="+id+"&experiment="+experiment+"&condition="+condition+"&n="+questionNum+"&stim="+stim+"&answer="+answer+"&r1="+r1+"&r2="+r2+"&x1="+x1+"&x2="+x2+"&rt="+rt;
   writeRequest.open("GET",writeString);
   writeRequest.addEventListener("load",doneWrite);
   writeRequest.send();
@@ -133,11 +191,17 @@ function keyPressed(event){
 }
 
 function clickLeft(){
-  document.getElementById("questionForm")["choice"].value = -1;
-  writeAnswer();
+  if(enabled){
+    document.getElementById("questionForm")["choice"].value = -1;
+    enabled = false;
+    writeAnswer();  
+  }
 }
 
 function clickRight(){
-  document.getElementById("questionForm")["choice"].value = 1;
-  writeAnswer();
+  if(enabled){
+    document.getElementById("questionForm")["choice"].value = 1;
+    enabled = false;
+    writeAnswer();
+  }
 }

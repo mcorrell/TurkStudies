@@ -4,5 +4,41 @@
 <script language="javascript" src="./scripts.js"></script>
 </head>
 <body>
+<p>Thank you for your participation!</p>
+<p>We will now ask you for some demographic information. You will also have the chance to give feedback.</p>
+
+<p><ol>
+<li>What is your gender?<br />
+  <input type="radio" name="gender" value="Male" />Male<br />
+  <input type="radio" name="gender" value="Female" />Female<br />
+  <input type="radio" name="gender" value="Other" />Other<br />
+  <input type="radio" name="gender" value="Decline" />Decline to state<br />
+</li>
+<br />
+<li>What is your highest level of education?<br />
+  <input type="radio" name="education" value="1" />Some high school<br />
+  <input type="radio" name="education" value="2" />High school degree<br />
+  <input type="radio" name="education" value="3" />Some college<br />
+  <input type="radio" name="education" value="4" />College degree<br />
+  <input type="radio" name="education" value="5" />Graduate degree<br />
+</li>
+<br />
+<li>How do you rate your experience interpreting graphs and charts (1-5)?<br />
+  <input type="radio" name="experience" value="1" />1. No experience<br />
+  <input type="radio" name="experience" value="2" />2. <br />
+  <input type="radio" name="experience" value="3" />3. Some experience<br />
+  <input type="radio" name="experience" value="4" />4. <br />
+  <input type="radio" name="experience" value="5" />5. A great deal of experience<br />
+</li>
+ <br />
+<li>Any additional comments or feedback?<br />
+<textarea rows="4" cols="50">
+</textarea>
+</ol>
+
+</p>
+ <input type="submit" name="submit" value="Submit" />
+ <input type="hidden" id="experiment" name="experiment" value="" /> 
+ <input type="hidden" id="workerId" name="workerId" value="" />
 </body>
 </html>
