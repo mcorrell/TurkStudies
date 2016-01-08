@@ -21,9 +21,9 @@ function gup(name){
 
 function plotDot(x1,x2,r1,r2,m,b){
   document.getElementById('circle1').style.left= toScreenX(x1)-5+"px";
-  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-15+"px";
+  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-240+"px";
   document.getElementById('circle2').style.left = toScreenX(x2)-5+"px";
-  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-25+"px";
+  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-250+"px";
 }
 
 function RToY(r,x,m,b){
@@ -55,6 +55,8 @@ function parseImg(img){
 }
 
 function receiveImg(){
+  var questionNum = document.getElementById("questionId").value;
+  var curQ = questions[questionNum-1];
   document.getElementById('stim').src = "data/"+experiment+"/"+condition+"/"+this.responseText;
   document.getElementById("questionForm")["stim"].value = this.responseText;
   //console.log(this.responseText); 
@@ -66,16 +68,24 @@ function receiveImg(){
   while(screenDist(x1,r1,x2,r2)<10){
    x1 = clamp((Math.random()*0.5)+0.25);
    x2 = clamp((Math.random()*0.5)+0.25);
+   r1 = Math.random()-0.5;
+   r2 = Math.random()-0.5;
+   if((curQ.winner===-1 && r1>r2) || (curQ.winner===1 && r2>r1)){
+     var temp = r1;
+     r1 = r2;
+     r2 = temp;
+   }
    //r1 = RToY(0,x1,stim.m,stim.b);
    //r2 = RToY(0,x2,stim.m,stim.b);
-   r1 = clamp(RToY(Math.random()-0.5,x1,stim.m,stim.b));
-   r2 = clamp(RToY(Math.random()-0.5,x2,stim.m,stim.b));
+   r1 = clamp(RToY(Math.abs(r1)*curQ.signOne,x1,stim.m,stim.b));
+   r2 = clamp(RToY(Math.abs(r2)*curQ.signTwo,x2,stim.m,stim.b));
    //console.log("("+x1+","+r1+")"+" ("+x2+","+r2+")");
   }
+  
   document.getElementById("circle1").style.left = toScreenX(x1);
-  document.getElementById("circle1").style.top = toScreenY(r1)-15;
+  document.getElementById("circle1").style.top = toScreenY(r1)-240;
   document.getElementById("circle2").style.left = toScreenX(x2);
-  document.getElementById("circle2").style.top = toScreenY(r2)-25;
+  document.getElementById("circle2").style.top = toScreenY(r2)-250;
   document.getElementById("questionForm")["r1"].value = r1;
   document.getElementById("questionForm")["r2"].value = r2;
   document.getElementById("questionForm")["x1"].value = x1;
@@ -91,13 +101,14 @@ function screenDist(x1,y1,x2,y2){
 function doneWrite(){
   document.getElementById("green").checked = false;
   document.getElementById("orange").checked = false;
-  getRndImg(); 
+   
   document.getElementById("questionId").value++;
   var questionNum = document.getElementById("questionId").value;
   if(questionNum>questionMax){
     window.location = "posttest.html";
   }
   else{
+    getRndImg();
     document.getElementById("questionNum").innerHTML = questionNum;
   }
 }
@@ -125,11 +136,13 @@ function initialize(){
   document.getElementById("left").addEventListener("click",clickLeft);
   document.getElementById("right").addEventListener("click",clickRight);
   document.getElementById("questionMax").innerHTML = questionMax;
+  rndStimuli();
   getRndImg();
 }
 
-function getRndImg(){ 
-  condition = rndCondition(); 
+function getRndImg(){
+  var questionNum = document.getElementById("questionId").value; 
+  condition = questions[questionNum-1].condition; 
   var imgRequest = new XMLHttpRequest();
   imgRequest.open("GET","data/genStimuli.php?experiment="+experiment+"&condition="+condition,true);
   imgRequest.addEventListener("load",receiveImg);
@@ -156,16 +169,30 @@ function rndStimuli(){
   // Scatter/scattertrend/trend
   // 60 stim = 20 per scatter, 10 per scatter per side.
   // Only allow xs in [-0.5,0.5], rs in the same range.
-    
-  
+  // 30 "winners" per color  
+  var i;
+  for(i = 0;i<questions.length;i++){
+    questions[i] = {};
+    if(i<questions.length/2){
+      questions[i].winner = -1; 
+    }
+    else{
+      questions[i].winner = 1;
+    }
+    questions[i].condition = conditions[i%conditions.length]; 
+    questions[i].signOne = i%2==0 ? 1 : -1;
+    questions[i].signTwo = i%4 < 2 ? 1 : -1; 
+  } 
+
   questions = permute(questions);
 }
 
 function writeAnswer(){
   var rt = (new Date()).getTime() - startTime;
   var answer = document.getElementById("questionForm")["choice"].value;
-  if(!id){
-    var id = "DEBUG";
+  var id = gup("workerId");
+  if(!id || id==="" || id.length===0){
+    id = "DEBUG";
   }
   var questionNum = document.getElementById("questionForm")["questionId"].value;
   var r1 = document.getElementById("questionForm")["r1"].value;
@@ -178,6 +205,36 @@ function writeAnswer(){
   writeRequest.open("GET",writeString);
   writeRequest.addEventListener("load",doneWrite);
   writeRequest.send();
+}
+
+/*function writeDemo(){
+  var writeRequest = new XMLHttpRequest();
+  var writeString = "data/demowrite.php?";
+  writeRequest.open("GET",writeString);
+  writeRequest.addEventListener("load",doneDemoWrite);
+  writeRequest.send(); 
+}
+*/
+
+function disableBtn(){
+ if(gup('assignmentId')== "ASSIGNMENT_ID_NOT_AVAILABLE"){
+   document.getElementById("rdyBtn").disabled = true;
+   document.getElementById("rdyBtn").value = "PREVIEW MODE";
+ }
+}
+
+function setTurkValues(){
+  document.getElementById("assignmentId").value= gup('assignmentId');
+  document.getElementById("workerId").value=gup('workerId');
+  var form = document.getElementById("mturk_form");
+  if(document.referrer && (document.referrer.indexOf('workersandbox')!= -1)){
+    form.action = "https://workersandbox.mturk.com/mturk/externalSubmit";
+  }
+}
+
+function validateDemo(){
+  window.parent.document.getElementById("submitButton").disabled = "false";
+  //window.parent.document.getElementById("gender").value
 }
 
 function keyPressed(event){

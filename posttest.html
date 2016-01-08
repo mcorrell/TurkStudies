@@ -1,12 +1,15 @@
 <html>
 <head>
+<title>Graphical Perception of Information Visualization</title>
 <link rel="stylesheet" type="text/css" href="./style.css" />
 <script language="javascript" src="./scripts.js"></script>
 </head>
-<body>
+<body onload="setTurkValues()">
 <p>Thank you for your participation!</p>
 <p>We will now ask you for some demographic information. You will also have the chance to give feedback.</p>
 
+<form id="mturk_form" method="POST" action="https://www.mturk.com/mturk/externalSubmit" />
+<input type="hidden" id="assignmentId" name="assignmentId" value="">
 <p><ol>
 <li>What is your gender?<br />
   <input type="radio" name="gender" value="Male" />Male<br />
@@ -37,8 +40,9 @@
 </ol>
 
 </p>
- <input type="submit" name="submit" value="Submit" />
+ <input type="submit" class="navBtn" name="submit" onsubmit="return validateDemo()" value="Submit" />
  <input type="hidden" id="experiment" name="experiment" value="" /> 
  <input type="hidden" id="workerId" name="workerId" value="" />
+</form>
 </body>
 </html>
