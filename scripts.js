@@ -21,9 +21,9 @@ function gup(name){
 
 function plotDot(x1,x2,r1,r2,m,b){
   document.getElementById('circle1').style.left= toScreenX(x1)-5+"px";
-  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-240+"px";
+  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-15+"px";
   document.getElementById('circle2').style.left = toScreenX(x2)-5+"px";
-  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-250+"px";
+  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-25+"px";
 }
 
 function RToY(r,x,m,b){
@@ -75,17 +75,16 @@ function receiveImg(){
      r1 = r2;
      r2 = temp;
    }
+  plotDot(x1,x2,r1,r2,stim.m,stim.b);
    //r1 = RToY(0,x1,stim.m,stim.b);
    //r2 = RToY(0,x2,stim.m,stim.b);
-   r1 = clamp(RToY(Math.abs(r1)*curQ.signOne,x1,stim.m,stim.b));
-   r2 = clamp(RToY(Math.abs(r2)*curQ.signTwo,x2,stim.m,stim.b));
+   var y1 = clamp(RToY(Math.abs(r1)*curQ.signOne,x1,stim.m,stim.b));
+   var y2 = clamp(RToY(Math.abs(r2)*curQ.signTwo,x2,stim.m,stim.b));
    //console.log("("+x1+","+r1+")"+" ("+x2+","+r2+")");
   }
-  
-  document.getElementById("circle1").style.left = toScreenX(x1);
-  document.getElementById("circle1").style.top = toScreenY(r1)-240;
-  document.getElementById("circle2").style.left = toScreenX(x2);
-  document.getElementById("circle2").style.top = toScreenY(r2)-250;
+
+  document.getElementById("questionForm")["y1"].value = y1;
+  document.getElementById("questionForm")["y2"].value = y2;
   document.getElementById("questionForm")["r1"].value = r1;
   document.getElementById("questionForm")["r2"].value = r2;
   document.getElementById("questionForm")["x1"].value = x1;
@@ -105,7 +104,7 @@ function doneWrite(){
   document.getElementById("questionId").value++;
   var questionNum = document.getElementById("questionId").value;
   if(questionNum>questionMax){
-    window.location = "posttest.html";
+    window.location = "posttest.html?workerId="+gup('workerId')+"&assignmentId="+gup('assignmentId');
   }
   else{
     getRndImg();
@@ -199,9 +198,11 @@ function writeAnswer(){
   var r2 = document.getElementById("questionForm")["r2"].value;
   var x1 = document.getElementById("questionForm")["x1"].value;
   var x2 = document.getElementById("questionForm")["x2"].value;
+  var y1 = document.getElementById("questionForm")["y1"].value;
+  var y2 = document.getElementById("questionForm")["y2"].value;
   var stim = document.getElementById("questionForm")["stim"].value;
   var writeRequest = new XMLHttpRequest();
-  var writeString = "data/write.php?workerID="+id+"&experiment="+experiment+"&condition="+condition+"&n="+questionNum+"&stim="+stim+"&answer="+answer+"&r1="+r1+"&r2="+r2+"&x1="+x1+"&x2="+x2+"&rt="+rt;
+  var writeString = "data/write.php?workerId="+id+"&experiment="+experiment+"&condition="+condition+"&n="+questionNum+"&stim="+stim+"&answer="+answer+"&r1="+r1+"&r2="+r2+"&x1="+x1+"&x2="+x2+"&y1="+y1+"&y2="+y2+"&rt="+rt;
   writeRequest.open("GET",writeString);
   writeRequest.addEventListener("load",doneWrite);
   writeRequest.send();
@@ -221,6 +222,11 @@ function disableBtn(){
    document.getElementById("rdyBtn").disabled = true;
    document.getElementById("rdyBtn").value = "PREVIEW MODE";
  }
+ setTurkLink();
+}
+
+function setTurkLink(){
+   document.getElementById("rdyLink").href+="?assignmentId="+gup('assignmentId')+"&workerId="+gup('workerId');
 }
 
 function setTurkValues(){
