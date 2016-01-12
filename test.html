@@ -12,7 +12,7 @@ window.addEventListener("message",receiveMessage,false);
 <body onload="setTurkLink()">
 
 <iframe id="turkFrame" width="100%" height="100%"></iframe>
-<form id="mturk_form" method="post">
+<form id="mturk_form" method="post" action="https://www.mturk.com/mturk/externalSubmit">
 <input type="hidden" id="experiment" name="experiment" />
 <input type="hidden" id="assignmentId" name="assignmentId" />
 <input type="hidden" id="workerId" name="workerId">
