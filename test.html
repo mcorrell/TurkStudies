@@ -1,0 +1,22 @@
+<html>
+<head>
+<title>Graphical Perception of Information Visualization</title>
+<link rel="stylesheet" type="text/css" href="./style.css" />
+<script language="javascript" src="./scripts.js"></script>
+<script>
+
+window.addEventListener("message",receiveMessage,false);
+
+</script>
+</head>
+<body onload="setTurkLink()">
+
+<iframe id="turkFrame" width="100%" height="100%"></iframe>
+<form id="mturk_form" method="post">
+<input type="hidden" id="experiment" name="experiment" />
+<input type="hidden" id="assignmentId" name="assignmentId" />
+<input type="hidden" id="workerId" name="workerId">
+<input id="turkBtn" type="submit" class="navBtn" name="submit" onsubmit="return validateDemo()" style="visibility:hidden"  value="Submit" />
+</form>
+</body>
+</html>

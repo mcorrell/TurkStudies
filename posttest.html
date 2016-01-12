@@ -8,7 +8,7 @@
 <p>Thank you for your participation!</p>
 <p>We will now ask you for some demographic information. You will also have the chance to give feedback.</p>
 
-<form id="mturk_form" method="POST" action="https://www.mturk.com/mturk/externalSubmit" />
+<form id="demoForm" method="POST" action="data/demoWrite.php" onsubmit="return validateDemo()"/>
 <input type="hidden" id="assignmentId" name="assignmentId" value="">
 <p><ol>
 <li>What is your gender?<br />
@@ -34,13 +34,17 @@
   <input type="radio" name="experience" value="5" />5. A great deal of experience<br />
 </li>
  <br />
+<li>What is your age?<br />
+<input type="number" name="age" min="18" max="100" />
+</li>
+<br />
 <li>Any additional comments or feedback?<br />
-<textarea rows="4" cols="50">
+<textarea name="comments" rows="4" cols="50">
 </textarea>
 </ol>
 
 </p>
- <input type="submit" class="navBtn" name="submit" onsubmit="return validateDemo()" value="Submit" />
+ <input type="submit" class="navBtn" name="submit"  value="Submit" />
  <input type="hidden" id="experiment" name="experiment" value="" /> 
  <input type="hidden" id="workerId" name="workerId" value="" />
 </form>

@@ -20,10 +20,10 @@ function gup(name){
 }
 
 function plotDot(x1,x2,r1,r2,m,b){
-  document.getElementById('circle1').style.left= toScreenX(x1)-5+"px";
-  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-15+"px";
-  document.getElementById('circle2').style.left = toScreenX(x2)-5+"px";
-  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-25+"px";
+  document.getElementById('circle1').style.left= toScreenX(x1)+110+"px";
+  document.getElementById('circle1').style.top=  toScreenY((m*(x1))+b+r1)-143.5+"px";
+  document.getElementById('circle2').style.left = toScreenX(x2)+110+"px";
+  document.getElementById('circle2').style.top= toScreenY((m*(x2))+b+r2)-148.5+"px";
 }
 
 function RToY(r,x,m,b){
@@ -31,11 +31,11 @@ function RToY(r,x,m,b){
 }
 
 function toScreenX(x){
-  return x*450;
+  return (x*225);
 }
 
 function toScreenY(y){
-  return y*-450;
+  return (y*-225);
 }
 
 function toScreen(xy){
@@ -66,8 +66,8 @@ function receiveImg(){
   r2 = 0,
   stim = parseImg(this.responseText);
   while(screenDist(x1,r1,x2,r2)<10){
-   x1 = clamp((Math.random()*0.5)+0.25);
-   x2 = clamp((Math.random()*0.5)+0.25);
+   x1 = Math.random();
+   x2 = Math.random();
    r1 = Math.random()-0.5;
    r2 = Math.random()-0.5;
    if((curQ.winner===-1 && r1>r2) || (curQ.winner===1 && r2>r1)){
@@ -78,8 +78,8 @@ function receiveImg(){
   plotDot(x1,x2,r1,r2,stim.m,stim.b);
    //r1 = RToY(0,x1,stim.m,stim.b);
    //r2 = RToY(0,x2,stim.m,stim.b);
-   var y1 = clamp(RToY(Math.abs(r1)*curQ.signOne,x1,stim.m,stim.b));
-   var y2 = clamp(RToY(Math.abs(r2)*curQ.signTwo,x2,stim.m,stim.b));
+   var y1 = RToY(Math.abs(r1)*curQ.signOne,x1,stim.m,stim.b);
+   var y2 = RToY(Math.abs(r2)*curQ.signTwo,x2,stim.m,stim.b);
    //console.log("("+x1+","+r1+")"+" ("+x2+","+r2+")");
   }
 
@@ -222,25 +222,61 @@ function disableBtn(){
    document.getElementById("rdyBtn").disabled = true;
    document.getElementById("rdyBtn").value = "PREVIEW MODE";
  }
- setTurkLink();
+ setTurkValues();
+ //console.log(window.location);
 }
 
 function setTurkLink(){
-   document.getElementById("rdyLink").href+="?assignmentId="+gup('assignmentId')+"&workerId="+gup('workerId');
+  setTurkValues();
+  var srcString = "./index.html?assignmentId="+gup("assignmentId")+"&workerId="+gup("workerId");
+  document.getElementById("turkFrame").src=srcString;
+  setTurkValues();
 }
 
 function setTurkValues(){
-  document.getElementById("assignmentId").value= gup('assignmentId');
-  document.getElementById("workerId").value=gup('workerId');
-  var form = document.getElementById("mturk_form");
-  if(document.referrer && (document.referrer.indexOf('workersandbox')!= -1)){
-    form.action = "https://workersandbox.mturk.com/mturk/externalSubmit";
+  if(document.getElementById("experiment")){
+    document.getElementById("experiment").value= experiment;
   }
+  if(document.getElementById("assignmentId")){
+    document.getElementById("assignmentId").value= gup('assignmentId');
+  }
+  if(document.getElementById("workerId")){
+    document.getElementById("workerId").value=gup('workerId');
+  }
+  var form = document.getElementById("mturk_form");
+  if(form && document.referrer && (document.referrer.indexOf('workersandbox')!= -1)){
+    form.action = "https://workersandbox.mturk.com/mturk/externalSubmit";  
+  }
+  var rdyLink = document.getElementById("rdyLink");
+  if(rdyLink){
+    rdyLink.href+= "?workerId="+gup("workerId")+"&assignmentId="+gup("assignmentId");
+  }
+
+}
+
+function receiveMessage(event){
+  var origin = event.origin || event.originalEvent.origin;
+  console.log(origin);
+  //console.log(event.data);
+  document.getElementById("turkFrame").height = "100px";
+  if(event.data && event.data==="done"){
+    document.getElementById("turkBtn").style.visibility = "visible";
+  }
+  
 }
 
 function validateDemo(){
-  window.parent.document.getElementById("submitButton").disabled = "false";
+  //window.parent.document.getElementById("submitButton").disabled = "false";
   //window.parent.document.getElementById("gender").value
+  var form = document.getElementById("demoForm");
+  if(form["gender"].value && form["education"].value && form["experience"].value){
+    parent.postMessage("done","https://homes.cs.washington.edu");
+    return true;
+  }
+  else{
+    alert("Please enter your gender, education, age, and experience");
+    return false;
+  }
 }
 
 function keyPressed(event){
