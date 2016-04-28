@@ -1,0 +1,34 @@
+.canvas {
+  position: absolute;
+  left: 25%;
+  margin: auto;
+  width: 400px;
+  height: 400px;
+  border: 1px solid black;
+}
+
+.lane {
+  fill: lightcyan;
+  fill-opacity: 0.5;
+  stroke-width: 0px;
+}
+
+.active {
+  stroke-width: 1px;
+  stroke: black;
+  fill: steelblue;
+}
+
+.active:hover {
+  stroke-width: 5px;
+  fill: lightsteelblue;
+}
+
+.inactive {
+  fill: lightgray;
+  stroke: lightslategray;
+}
+
+.inactive:hover {
+
+}

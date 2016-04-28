@@ -1,0 +1,130 @@
+h3{
+  text-align: center;
+}
+
+
+.example {
+  width: 225px;
+  margin-left: 0 auto;
+  margin-right: 0 auto;
+  border: 1px solid black;
+  
+}
+
+.figurelbl {
+  text-align: center;
+}
+
+.figure {
+  width: 225px;
+  height: 225px;
+}
+
+.caption {
+  font-size: 10pt;
+  text-align: center;
+  border: 1px solid black; 
+}
+
+#questionBox{
+  margin-left: auto;
+  margin-right: auto;
+  width:450px; 
+}
+
+#questionName{
+  text-align: center;
+  font-weight: bold;
+}
+
+#questionText{
+  text-align:center; 
+}
+
+.green {
+  color: #1b9e77; 
+}
+
+.orange {
+  color: #d95f02;
+}
+#circle1 {
+  background: #1b9e77;
+  height: 5px;
+  width: 5px;
+  position: relative;
+  border-radius: 50%;
+}
+
+#circle2 {
+  background: #d95f02;
+  height: 5px;
+  width: 5px;
+  position: relative;
+  border-radius: 50%;
+}
+
+#question {
+  margin-top: -20px;
+  table-border: 1px;
+  width: 450px;
+  text-align: center;
+  
+}
+
+.navBtn{
+  color: #fff;
+  background-color: #428bca;
+  border-color: #357ebd;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.navBtn:hover{
+  background-color: #357ebd;
+}
+
+.navBtn:disabled{
+  border-color: #eee;
+  background-color: #bbb;
+}
+
+#left{
+  background: #1b9e77;
+  color: #fff;
+  text-align: center;
+  border: 2px solid #fff;
+  border-radius: 5px;
+}
+
+#left:hover{
+  border: 2px solid #000;
+}
+
+#right{
+  background: #d95f02;
+  color: #fff;
+  text-align: center;
+  border: 2px solid #fff;
+  border-radius: 5px;
+}
+
+#right:hover{
+  border: 2px solid #000;
+}
+
+label {
+  width: 100%;
+  height: 100%;
+  min-height: 100%;
+}
+
+#stim{
+  width: 225px;
+  height: 225px;
+  margin-top: 140px;
+  margin-bottom: 140px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}

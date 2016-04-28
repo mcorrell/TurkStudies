@@ -1,12 +1,17 @@
 <?php
-$experiment = $_GET['dir'];
-$condition = $_GET['cond'];
+$experiment = $_POST['experiment'];
+$condition = $_POST['condition'];
 require_once('utils.php');
-$experiment='Pilot';
-$condition='scatter';
+if($experiment==""){
+  $experiment='Pilot';
+}
+if($condition==""){
+  $condition='scatter';
+}
+echo "TYOP";
 $dirname = $experiment.'/'.$condition;
 $fname = imgByIndex($dirname,rand(0,numImgs($dirname)-1));
-echo $fname;
+echo "YO".$fname;
 ?>
 
 
