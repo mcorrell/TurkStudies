@@ -5,7 +5,7 @@ var svg = d3.select("svg")
             .style("width",canvasW)
             .style("height",canvasH);
 
-var lanes = [0.2,0.4,0.6,0.8];
+var lanes = [0.1,0.3+(2/30),0.6+(1/30),0.9];
 
 var laneW = 20;
 

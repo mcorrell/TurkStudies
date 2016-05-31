@@ -1,0 +1,48 @@
+.stimulus {
+  position: absolute;
+  left: 25%;
+  margin: auto;
+  width: 400px;
+  height: 400px;
+  border: 1px solid black;
+}
+
+.slider {
+  width: 400px;
+}
+
+.trend {
+  fill: none;
+  stroke: #4b2e83;
+  stroke-width: 5px;
+}
+
+.question {
+  text-align: center;
+  font-weight: bold;
+}
+
+.prompt {
+  text-align: center;
+}
+
+.confirm {
+  text-align: center;
+}
+
+.button{
+  color: #fff;
+  background-color: #428bca;
+  border-color: #357ebd;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.button:hover{
+  background-color: #357ebd;
+}
+
+.button:disabled{
+  border-color: #eee;
+  background-color: #bbb;
+}
