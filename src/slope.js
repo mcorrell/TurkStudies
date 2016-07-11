@@ -212,7 +212,7 @@ function initialize(){
 
 function answer(){
   var rt = (new Date()).getTime() - startTime;
-  var actual = parseFloat(stim[questionNum].sign+stim[questionNum].m);
+  var actual = parseFloat(stim[questionNum].sign)*stim[questionNum].m;
   var answer = d3.select("#slope").node().value;
   var error = d3.format(".2f")(actual-answer);
   console.log("Actual:" + actual + " answered:"+answer + " error:"+error);
@@ -265,7 +265,7 @@ function genStim(){
         for(let s of ss){
           theStim[i] = {};
           theStim[i].sigma = sigma;
-          theStim[i].sign = s=="-1"?s:"1";
+          theStim[i].sign = s=="-"? "-1":"1";
           theStim[i].type = type;
           theStim[i].m = m;
           theStim[i].src = "data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
@@ -284,7 +284,7 @@ function genStim(){
     s = ss[Math.floor(Math.random()*ss.length)];
     theStim[i] = {};
     theStim[i].sigma = sigma;
-    theStim[i].sign = s=="-1"?s:"1";
+    theStim[i].sign = s=="-"? "-1":"1";
     theStim[i].type = type;
     theStim[i].m = m;
     theStim[i].src = "data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
