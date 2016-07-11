@@ -3,7 +3,6 @@
   left: 25%;
   margin: auto;
   width: 300px;
-  border: 1px solid black;
   text-align: center;
 }
 
@@ -47,3 +46,12 @@
   border-color: #eee;
   background-color: #bbb;
 }
+
+.fcontainer{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+

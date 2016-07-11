@@ -1,3 +1,6 @@
+var experiment = "Exp1";
+var server = "https://homes.cs.washington.edu/~mcorrell/TurkStudies/";
+
 var canvasW = 300;
 var canvasH = 525;
 
@@ -5,21 +8,12 @@ var resolution = 50;
 var slopeLine = [];
 
 var questionNum = 0;
-var questionMax = 75;
+var questionMax = 0;
 
-var experiment = "Exp1";
-var server = "https://homes.cs.washington.edu/~mcorrell/";
-
-var svg = d3.select("svg")
-            .style("width",canvasW)
-            .style("height",canvasH);
-
-
-var stim = genStim();
-
-//var stim = [{"src": "https://homes.cs.washington.edu/~mcorrell/TurkStudies/Exp1/trig/scattertrend/S0.2m1.0.png", "type" : "trig"},
-         //            {"src": "https://homes.cs.washington.edu/~mcorrell/TurkStudies/Exp1/line/scattertrend/S0.2m1.0.png", "type" : "line"}
-         //   ];
+var svg;
+var svgLine;
+var startTime;
+var stim;
 
 var x = d3.scale.linear()
           .domain([0,1])
@@ -46,21 +40,100 @@ var lineFunc = d3.svg.line()
                 .x(function(d) { return x(d.x);})
                 .y(function(d) {return y(d.y);});
 
-svg.append("svg:image").datum(stim[0])
-   .attr("x",0)
-   .attr("y",0)
-   .attr("height",canvasH)
-   .attr("width",canvasW)
-   .attr("xlink:href",function(d){ return d.src;});
+var main = d3.select("#fcontainer");
 
-d3.select("input").on("input",slope);
+function gup(name){
+  var regexS = "[\\?&]"+name+"=([^&#]*)";
+  var regex = new RegExp( regexS );
+  var tmpURL = window.location.href;
+  var results = regex.exec( tmpURL );
+  if( results == null )
+    return "";
+  else
+    return results[1];
+}
 
 
-var svgLine = svg.append("path").attr("class","trend");
+var workerId = gup("workerId");
+if(!workerId){
+  workerId = "UNKNOWN";
+}
 
-initialize();
+var assignmentId = gup("assignmentId");
+if(!assignmentId){
+  assignmentId = "";
+}
 
-d3.select("#submit").on("click",answer);
+function consent(){
+  main.append("iframe")
+  .style("width","100%")
+  .style("height","90%")
+  .attr("src",server+"consent.html");
+  
+  main.append("input")
+  .attr("class","button")
+  .attr("id","answer")
+  .attr("name","answer")
+  .attr("value","I Consent")
+  .on("click",finishConsent);
+}
+
+function finishConsent(){
+  main.selectAll("#answer").remove();
+  main.selectAll("iframe").remove();
+  task();
+}
+
+function task(){
+
+  //Create stimuli
+  stim = genStim();
+  
+  //Question Info
+  main.append("div")
+  .attr("class","question")
+  .html("Question <span id=\"questionNum\"></span>");
+  
+  //Main stim panel
+  svg = main.append("svg")
+    .style("width",canvasW)
+    .style("height",canvasH);
+  
+  //Input
+  main.append("input")
+    .attr("class","slider")
+    .attr("id","slope")
+    .attr("name","slope")
+    .attr("type","range")
+    .attr("value","0")
+    .attr("min","-1.00")
+    .attr("max","1.00")
+    .attr("step","0.01")
+    .on("input",slope);
+  
+  main.append("input")
+    .attr("class","button")
+    .attr("id","answer")
+    .attr("name","answer")
+    .attr("value","Answer")
+    .attr("disabled","disabled")
+  .on("click",answer);
+  
+  //Instructions
+  main.append("div")
+    .attr("class","prompt")
+    .html("Use the slider to adjust the line until it best matches the relationship of the points. <br /> Click the button above to confirm your answer.");
+  
+  //Set up Stimuli
+  svg.append("svg:image").datum(stim[0])
+    .attr("x",0)
+    .attr("y",0)
+    .attr("height",canvasH)
+    .attr("width",canvasW)
+    .attr("xlink:href",function(d){ return d.src;});
+  svgLine = svg.append("path").attr("class","trend");
+  initialize();
+}
 
 function makeSlope(m){
   var xp;
@@ -107,7 +180,7 @@ function slope(){
   svgLine.datum(slopeLine)
           .attr("d",lineFunc);
   
-  d3.select("#submit").attr("disabled",null);
+  d3.select("#answer").attr("disabled",null);
 }
 
 function initialize(){
@@ -116,14 +189,16 @@ function initialize(){
     .attr("d",lineFunc);
   d3.select("input").node().value = 0;
   d3.select("#questionNum").html((questionNum+1)+"/"+questionMax);
-  d3.select("#submit").attr("disabled","true");
+  d3.select("#answer").attr("disabled","true");
   svg.select("image").datum(stim[questionNum]).attr("xlink:href",function(d){ return d.src;});
+  starttime = (new Date()).getTime();
 }
 
 function answer(){
+  var rt = (new Date()).getTime() - startTime;
   var actual = parseFloat(stim[questionNum].sign+stim[questionNum].m);
   var answer = d3.select("input").node().value;
-  var error = actual-answer;
+  var error = d3.format(".2f")(actual-answer);
   console.log("Actual:" + actual + " answered:"+answer + " error:"+error);
   stim[questionNum].answer = answer;
   stim[questionNum].error = error;
@@ -131,7 +206,7 @@ function answer(){
   stim[questionNum].index = questionNum;
   questionNum++;
   if(questionNum>=questionMax){
-    finished();
+    finishTask();
   }
   else{
     initialize();
@@ -141,41 +216,167 @@ function answer(){
 function genStim(){
   var theStim = [];
   //slopes
-  var ms = ["1.0","0.8","0.6","0.4","0.2"];
+  var ms = ["0.8","0.4","0.2","0.1"];
   //sign of slope
   var ss = ["-",""];
   
-  var sigmas = ["0.05","0.1","0.15","0.2","0.25"];
+  var sigmas = ["0.05","0.1","0.15","0.2"];
   var types = ["line","trig","quad"];
   
-  var numValidation = 5;
-  
+  var numValidation = 4;
   var s,type,m,sigma;
-  for(var i = 0;i<questionMax;i++){
-    type = types[i%types.length];
-    m = ms[i%ms.length];
-    sigma = sigmas[i%sigmas.length];
-    s = ss[Math.round(Math.random())];
-    
+  var i = 0;
+  /*
+  for(let type of types){
+    for(let m of ms){
+      for(let sigma of sigmas){
+        for(let s of ss){
+          theStim[i] = {};
+          theStim[i].sigma = sigma;
+          theStim[i].sign = s;
+          theStim[i].type = type;
+          theStim[i].m = m;
+          theStim[i].src = server+"data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
+          i++;
+        }
+        }
+    }
+  }
+  */
+  for(var j = 0;j<numValidation;j++){
+    type = types[Math.floor(Math.random()*types.length)];
+    m = "1.0";
+    sigma = sigmas[Math.floor(Math.random()*sigmas.length)];
+    s = ss[Math.floor(Math.random()*ss.length)];
     theStim[i] = {};
     theStim[i].sigma = sigma;
     theStim[i].sign = s;
     theStim[i].type = type;
     theStim[i].m = m;
-    theStim[i].src = server+"TurkStudies/data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
+    theStim[i].src = server+"data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
+    theStim[i].id = workerId;
+    i++;
   }
   
+  questionMax = i;
   dl.permute(theStim);
   return theStim;
 }
 
-function finished(){
+function finishTask(){
+  main.selectAll("*").remove();
+  postTest();
+}
+
+function postTest(){
   var format = d3.format(".3f");
   var avgError = format(dl.mean(stim,"error"));
   var avgUError = format(dl.mean(stim,"unsignedError"));
-  d3.select("table").remove();
-  var doneBox = d3.select("body").append("div").attr("class","stimulus").html("Thank you for your participation. <br /> Average error: "+avgError+"<br /> Average absolute error: "+avgUError+"<br />");
-  doneBox.append("input").attr("class","button").attr("type","submit").attr("value","Done");
+  
+  main.append("div")
+    .html("Thank you for your participation!");
+  
+  main.append("div")
+    .html("We will now ask for demographic information. You will also have the chance to give feedback.");
+  
+  var form = main.append("form")
+  .attr("id","mturk_form")
+  .attr("method","post");
+  
+  if(document.referrer && (document.referrer.indexOf("workersandbox")!=-1)){
+    form.attr("action","https://workersandbox.mturk.com/mturk/externalSubmit")
+  }
+  else{
+    form.attr("action","https://www.mturk.com/mturk/externalSubmit");
+  }
+
+  var dlist = form.append("ol");
+  
+  form.append("input")
+    .attr("type","hidden")
+    .attr("name","error")
+    .attr("value",avgError);
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","uError")
+  .attr("value",avgUError);
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","experiment")
+  .attr("value",experiment);
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","assignmentId")
+  .attr("value",assignmentId);
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","workerId")
+  .attr("value",workerId);
+  
+  var genders = ["Male","Female","Other","Decline to state"];
+  var educations = ["Some high school","High school degree","Some college","College degree","Graduate degree"];
+  var experiences = ["1. No experience","2.","3. Some experience","4.","5. A great deal of experience"];
+  
+  var genderQ = dlist.append("li").html("What is your gender <br />");
+  
+  for(let gender of genders){
+    genderQ.append("input")
+      .attr("type","radio")
+      .attr("name","gender")
+      .attr("value",gender);
+    
+    genderQ.append("span").html(gender +"<br />");
+  }
+  
+  var eduQ = dlist.append("li").html("What is your highest level of education <br />");
+  
+  for(let education of educations){
+    eduQ.append("input")
+      .attr("type","radio")
+      .attr("name","education")
+      .attr("value",education);
+    
+    eduQ.append("span").html(education + "<br />");
+  }
+  
+  var expQ = dlist.append("li").html("How do you rate your experience interpreting graphs and charts (1-5)? <br />");
+  
+  for(var i = 0;i<experiences.length;i++){
+    expQ.append("input")
+      .attr("type","radio")
+      .attr("name","experience")
+      .attr("value",i);
+    
+    expQ.append("span").html(experiences[i]+"<br />");
+  }
+  
+  var ageQ = dlist.append("li").html("What is your age? <br />");
+  ageQ.append("input")
+    .attr("type","number")
+    .attr("name","age")
+    .attr("min","18")
+    .attr("max","100");
+  
+  
+  var commentQ = dlist.append("li").html("Any additional comments of feedback? <br />");
+  
+  commentQ.append("textarea")
+    .attr("name","comments")
+    .attr("rows","4")
+    .attr("cols","50");
+  
+  form.append("input")
+  .attr("id","turkBtn")
+  .attr("type","submit")
+  .attr("class","button")
+  .attr("name","submit")
+  .attr("value","Submit");
+  
 }
 
+consent();
 
