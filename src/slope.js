@@ -1,5 +1,4 @@
 var experiment = "Exp1";
-var server = "https://homes.cs.washington.edu/~mcorrell/TurkStudies/";
 
 var canvasW = 300;
 var canvasH = 525;
@@ -68,7 +67,7 @@ function consent(){
   main.append("iframe")
   .style("width","100%")
   .style("height","90%")
-  .attr("src",server+"consent.html");
+  .attr("src","consent.html");
   
   var readyBtn = main.append("input")
   .attr("class","button")
@@ -85,6 +84,17 @@ function consent(){
 }
 
 function finishConsent(){
+  tutorial();
+}
+
+function  tutorial(){
+  d3.select("iframe").attr("src","tutorial.html");
+  d3.select("#answer")
+    .attr("value","Ready")
+    .on("click",finishTutorial);
+}
+
+function finishTutorial(){
   main.selectAll("#answer").remove();
   main.selectAll("iframe").remove();
   task();
@@ -217,14 +227,14 @@ function writeAnswer(){
   var writeRequest = new XMLHttpRequest();
   var writeString = "answer="+JSON.stringify(stim[questionNum]);
   //console.log(writeString);
-  writeRequest.open("GET",server+"data/writeJSON.php?"+writeString,true);
+  writeRequest.open("GET","data/writeJSON.php?"+writeString,true);
   writeRequest.setRequestHeader("Content-Type", "application/json");
   writeRequest.addEventListener("load",doneAnswer);
   writeRequest.send();
 }
 
 function doneAnswer(){
-  console.log(this.responseText);
+  //console.log(this.responseText);
   questionNum++;
   if(questionNum>=questionMax){
     finishTask();
@@ -255,11 +265,11 @@ function genStim(){
         for(let s of ss){
           theStim[i] = {};
           theStim[i].sigma = sigma;
-          theStim[i].sign = s=="-"?s:"+";
+          theStim[i].sign = s=="-1"?s:"1";
           theStim[i].type = type;
           theStim[i].m = m;
-          theStim[i].src = server+"data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
-          theStim[i].isValidation = false;
+          theStim[i].src = "data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
+          theStim[i].isValidation = "false";
           theStim[i].id = workerId;
           i++;
         }
@@ -274,11 +284,11 @@ function genStim(){
     s = ss[Math.floor(Math.random()*ss.length)];
     theStim[i] = {};
     theStim[i].sigma = sigma;
-    theStim[i].sign = s=="-"?s:"+";
+    theStim[i].sign = s=="-1"?s:"1";
     theStim[i].type = type;
     theStim[i].m = m;
-    theStim[i].src = server+"data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
-    theStim[i].isValidation = true;
+    theStim[i].src = "data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
+    theStim[i].isValidation = "true";
     theStim[i].id = workerId;
     i++;
   }
