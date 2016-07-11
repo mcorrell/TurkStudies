@@ -70,12 +70,17 @@ function consent(){
   .style("height","90%")
   .attr("src",server+"consent.html");
   
-  main.append("input")
+  var readyBtn = main.append("input")
   .attr("class","button")
   .attr("id","answer")
   .attr("name","answer")
   .attr("value","I Consent")
   .on("click",finishConsent);
+  
+  if(assignmentId=="ASSIGNMENT_ID_NOT_AVAILABLE"){
+    readyBtn.attr("disabled","disabled");
+    readyBtn.attr("value","PREVIEW");
+  }
   
 }
 
@@ -205,6 +210,18 @@ function answer(){
   stim[questionNum].error = error;
   stim[questionNum].unsignedError = Math.abs(error);
   stim[questionNum].index = questionNum;
+  writeAnswer();
+}
+
+function writeAnswer(){
+  var writeRequest = new XMLHttpRequest();
+  var writeString = "answer="+JSON.stringify(stim[questionNum]);
+  writeRequest.open("POST",server+"data/writeJSON.php");
+  writeRequest.addEventListener("load",doneAnswer);
+  writeRequest.send(writeString);
+}
+
+function doneAnswer(){
   questionNum++;
   if(questionNum>=questionMax){
     finishTask();
@@ -212,6 +229,7 @@ function answer(){
   else{
     initialize();
   }
+  
 }
 
 function genStim(){
@@ -227,7 +245,7 @@ function genStim(){
   var numValidation = 4;
   var s,type,m,sigma;
   var i = 0;
-  /*
+  
   for(let type of types){
     for(let m of ms){
       for(let sigma of sigmas){
@@ -238,12 +256,13 @@ function genStim(){
           theStim[i].type = type;
           theStim[i].m = m;
           theStim[i].src = server+"data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
+          theStim[i].isValidation = false;
           i++;
         }
         }
     }
   }
-  */
+  
   for(var j = 0;j<numValidation;j++){
     type = types[Math.floor(Math.random()*types.length)];
     m = "1.0";
@@ -255,6 +274,7 @@ function genStim(){
     theStim[i].type = type;
     theStim[i].m = m;
     theStim[i].src = server+"data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
+    theStim[i].isValidation = true;
     theStim[i].id = workerId;
     i++;
   }
