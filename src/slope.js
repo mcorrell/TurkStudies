@@ -14,6 +14,7 @@ var svg;
 var svgLine;
 var startTime;
 var stim;
+var form;
 
 var x = d3.scale.linear()
           .domain([0,1])
@@ -76,6 +77,47 @@ function consent(){
   .attr("name","answer")
   .attr("value","I Consent")
   .on("click",finishConsent);
+  
+  makeForm();
+
+}
+
+function makeForm(){
+  // Turk assumes there's a form in your iframe. Otherwise it complains.
+  
+  form = main.append("form")
+  .attr("id","mturk_form")
+  .attr("method","post");
+  
+  if(document.referrer && (document.referrer.indexOf("workersandbox")!=-1)){
+    form.attr("action","https://workersandbox.mturk.com/mturk/externalSubmit")
+  }
+  else{
+    form.attr("action","https://www.mturk.com/mturk/externalSubmit");
+  }
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","experiment")
+  .attr("value",experiment);
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","assignmentId")
+  .attr("value",assignmentId);
+  
+  form.append("input")
+  .attr("type","hidden")
+  .attr("name","workerId")
+  .attr("value",workerId);
+  
+  form.append("input")
+  .attr("id","turkBtn")
+  .attr("type","submit")
+  .attr("class","button")
+  .attr("name","submit")
+  .attr("value","Submit");
+  .attr("style","visibility:hidden");
 }
 
 function finishConsent(){
@@ -279,17 +321,6 @@ function postTest(){
   main.append("div")
     .html("We will now ask for demographic information. You will also have the chance to give feedback.");
   
-  var form = main.append("form")
-  .attr("id","mturk_form")
-  .attr("method","post");
-  
-  if(document.referrer && (document.referrer.indexOf("workersandbox")!=-1)){
-    form.attr("action","https://workersandbox.mturk.com/mturk/externalSubmit")
-  }
-  else{
-    form.attr("action","https://www.mturk.com/mturk/externalSubmit");
-  }
-
   var dlist = form.append("ol");
   
   form.append("input")
@@ -302,20 +333,6 @@ function postTest(){
   .attr("name","uError")
   .attr("value",avgUError);
   
-  form.append("input")
-  .attr("type","hidden")
-  .attr("name","experiment")
-  .attr("value",experiment);
-  
-  form.append("input")
-  .attr("type","hidden")
-  .attr("name","assignmentId")
-  .attr("value",assignmentId);
-  
-  form.append("input")
-  .attr("type","hidden")
-  .attr("name","workerId")
-  .attr("value",workerId);
   
   var genders = ["Male","Female","Other","Decline to state"];
   var educations = ["Some high school","High school degree","Some college","College degree","Graduate degree"];
@@ -369,13 +386,8 @@ function postTest(){
     .attr("rows","4")
     .attr("cols","50");
   
-  form.append("input")
-  .attr("id","turkBtn")
-  .attr("type","submit")
-  .attr("class","button")
-  .attr("name","submit")
-  .attr("value","Submit");
   
+  main.select("#turkBtn").attr("style","");
 }
 
 consent();
