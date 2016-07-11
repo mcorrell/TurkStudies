@@ -85,7 +85,7 @@ function consent(){
 function makeForm(){
   // Turk assumes there's a form in your iframe. Otherwise it complains.
   
-  form = main.append("form")
+  form = d3.select("body").append("form")
   .attr("id","mturk_form")
   .attr("method","post");
   
@@ -229,7 +229,7 @@ function initialize(){
   makeSlope(0);
   svgLine.datum(slopeLine)
     .attr("d",lineFunc);
-  d3.select("input").node().value = 0;
+  d3.select("#slope").node().value = 0;
   d3.select("#questionNum").html((questionNum+1)+"/"+questionMax);
   d3.select("#answer").attr("disabled","true");
   svg.select("image").datum(stim[questionNum]).attr("xlink:href",function(d){ return d.src;});
@@ -239,7 +239,7 @@ function initialize(){
 function answer(){
   var rt = (new Date()).getTime() - startTime;
   var actual = parseFloat(stim[questionNum].sign+stim[questionNum].m);
-  var answer = d3.select("input").node().value;
+  var answer = d3.select("#slope").node().value;
   var error = d3.format(".2f")(actual-answer);
   console.log("Actual:" + actual + " answered:"+answer + " error:"+error);
   stim[questionNum].answer = answer;
