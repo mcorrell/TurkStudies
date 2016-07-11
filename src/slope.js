@@ -216,13 +216,15 @@ function answer(){
 function writeAnswer(){
   var writeRequest = new XMLHttpRequest();
   var writeString = "answer="+JSON.stringify(stim[questionNum]);
-  writeRequest.open("POST",server+"data/writeJSON.php");
-  writeRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+  //console.log(writeString);
+  writeRequest.open("GET",server+"data/writeJSON.php?"+writeString,true);
+  writeRequest.setRequestHeader("Content-Type", "application/json");
   writeRequest.addEventListener("load",doneAnswer);
-  writeRequest.send(writeString);
+  writeRequest.send();
 }
 
 function doneAnswer(){
+  console.log(this.responseText);
   questionNum++;
   if(questionNum>=questionMax){
     finishTask();
