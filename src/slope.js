@@ -217,6 +217,7 @@ function writeAnswer(){
   var writeRequest = new XMLHttpRequest();
   var writeString = "answer="+JSON.stringify(stim[questionNum]);
   writeRequest.open("POST",server+"data/writeJSON.php");
+  writeRequest.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
   writeRequest.addEventListener("load",doneAnswer);
   writeRequest.send(writeString);
 }
@@ -252,11 +253,12 @@ function genStim(){
         for(let s of ss){
           theStim[i] = {};
           theStim[i].sigma = sigma;
-          theStim[i].sign = s;
+          theStim[i].sign = s=="-"?s:"+";
           theStim[i].type = type;
           theStim[i].m = m;
           theStim[i].src = server+"data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
           theStim[i].isValidation = false;
+          theStim[i].id = workerId;
           i++;
         }
         }
@@ -270,7 +272,7 @@ function genStim(){
     s = ss[Math.floor(Math.random()*ss.length)];
     theStim[i] = {};
     theStim[i].sigma = sigma;
-    theStim[i].sign = s;
+    theStim[i].sign = s=="-"?s:"+";
     theStim[i].type = type;
     theStim[i].m = m;
     theStim[i].src = server+"data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
