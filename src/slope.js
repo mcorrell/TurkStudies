@@ -116,7 +116,7 @@ function makeForm(){
   .attr("type","submit")
   .attr("class","button")
   .attr("name","submit")
-  .attr("value","Submit");
+  .attr("value","Submit")
   .attr("style","visibility:hidden");
 }
 
