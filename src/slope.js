@@ -254,13 +254,14 @@ function genStim(){
   var types = ["line","trig","quad"];
   
   var numValidation = 4;
-  var s,type,m,sigma;
   var i = 0;
   
-  for(let type of types){
-    for(let m of ms){
-      for(let sigma of sigmas){
-        for(let s of ss){
+  
+  for(var type of types){
+    for(var m of ms){
+      for(var sigma of sigmas){
+        for(var s of ss){
+
           theStim[i] = {};
           theStim[i].sigma = sigma;
           theStim[i].sign = s=="-"? "-1":"1";
@@ -270,10 +271,12 @@ function genStim(){
           theStim[i].isValidation = "false";
           theStim[i].id = workerId;
           i++;
+           
         }
-        }
+      }
     }
   }
+  
   
   for(var j = 0;j<numValidation;j++){
     type = types[Math.floor(Math.random()*types.length)];
@@ -357,7 +360,7 @@ function postTest(){
   
   var genderQ = dlist.append("li").html("What is your gender <br />");
   
-  for(let gender of genders){
+  for(var gender of genders){
     genderQ.append("input")
       .attr("type","radio")
       .attr("name","gender")
@@ -368,7 +371,7 @@ function postTest(){
   
   var eduQ = dlist.append("li").html("What is your highest level of education <br />");
   
-  for(let education of educations){
+  for(var education of educations){
     eduQ.append("input")
       .attr("type","radio")
       .attr("name","education")
