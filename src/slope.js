@@ -65,8 +65,6 @@ if(!assignmentId){
 
 function consent(){
   main.append("iframe")
-  .style("width","100%")
-  .style("height","90%")
   .attr("src","consent.html");
   
   var readyBtn = main.append("input")
