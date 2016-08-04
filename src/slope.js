@@ -1,4 +1,4 @@
-var experiment = "Exp1";
+var experiment = "Exp2";
 
 var canvasW = 300;
 var canvasH = 525;
@@ -252,44 +252,62 @@ function genStim(){
   
   var sigmas = ["0.05","0.1","0.15","0.2"];
   var types = ["line","trig","quad"];
+  var graphtypes = experiment=="Exp1" ? ["scatter"] : ["scatter","area","line"];
   
   var numValidation = 4;
   var i = 0;
   
+  var numEachType = [0,0,0];
+  var typeIndex;
+  var numRegular = graphtypes.length*ms.length*sigmas.length*ss.length;
   
-  for(var type of types){
+  //Add blocked factors
+  for(var graph of graphtypes){
     for(var m of ms){
       for(var sigma of sigmas){
         for(var s of ss){
-
+          
+          //Type of fit now a random factor, rather than blocked:
+          do{
+            typeIndex = Math.floor(Math.random()*types.length);
+          }while(numEachType[typeIndex]>(numRegular/3));
+          type = types[typeIndex];
+          numEachType[typeIndex]++;
+          
           theStim[i] = {};
           theStim[i].sigma = sigma;
           theStim[i].sign = s=="-"? "-1":"1";
           theStim[i].type = type;
           theStim[i].m = m;
-          theStim[i].src = "data/"+experiment+"/"+type+"/scatter/S"+sigma+"m"+s+m+".png";
+          theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"/S"+sigma+"m"+s+m+".png";
           theStim[i].isValidation = "false";
           theStim[i].id = workerId;
+          theStim[i].graphtype = graph;
           i++;
-           
+          
         }
       }
     }
   }
   
   
+  
+  
+  //Add validation stimuli
   for(var j = 0;j<numValidation;j++){
     type = types[Math.floor(Math.random()*types.length)];
     m = "1.0";
     sigma = sigmas[Math.floor(Math.random()*sigmas.length)];
     s = ss[Math.floor(Math.random()*ss.length)];
+    graph = graphtypes[Math.floor(Math.random()*graphtypes.length)];
     theStim[i] = {};
     theStim[i].sigma = sigma;
     theStim[i].sign = s=="-"? "-1":"1";
     theStim[i].type = type;
     theStim[i].m = m;
-    theStim[i].src = "data/"+experiment+"/"+type+"/scattertrend/S"+sigma+"m"+s+m+".png";
+    theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"trend/S"+sigma+"m"+s+m+".png";
     theStim[i].isValidation = "true";
+    theStim[i].graphtype = graph;
     theStim[i].id = workerId;
     i++;
   }
