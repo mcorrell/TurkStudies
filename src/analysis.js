@@ -1,5 +1,7 @@
 var data;
-
+var experiment = "Exp2";
+var demo = "exp2demo";
+var raw = "exp2";
 process();
 
 function process(){
@@ -11,8 +13,8 @@ function process(){
   // 5. Anonymize by replacing turkID with index in completion table.
   // 6. save that sucker for the repo.
   // 7. do analysis.
-  var demoTable = dl.csv("./Exp1/exp1demo.csv");
-  var dataTable = dl.csv("./Exp1/exp1.csv");
+  var demoTable = dl.csv("./"+experiment+"/"+demo+".csv");
+  var dataTable = dl.csv("./"+experiment+"/"+raw+".csv");
   
   var cleaned = [];
   var valids = [];
@@ -24,13 +26,23 @@ function process(){
     turkId = row.WorkerId;
     valids = dataTable.filter(function(x){ return x.id == turkId && !(x.isValidation);});
     valids = cleanRows(valids,i);
-    if(valids.length>96){
-      console.log(turkId + ":" + valids.length);
-    }
     cleaned = cleaned.concat(valids);
   }
   
   data = cleaned;
+  //for(var i = 0;i<data.length;i++){
+    //  writeRow(data[i]);
+  //}
+  
+}
+
+function writeRow(row){
+  var writeRequest = new XMLHttpRequest();
+  var writeString = "clean=true&answer="+JSON.stringify(row);
+  //console.log(writeString);
+  writeRequest.open("GET","writeJSON.php?"+writeString,true);
+  writeRequest.setRequestHeader("Content-Type", "application/json");
+  writeRequest.send();
 }
 
 function cleanRows(rows,index){
