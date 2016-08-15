@@ -1,4 +1,30 @@
-var experiment = "Exp2";
+/*
+ Code for Turk Experiments for analysis of "regression by eye"
+ 
+ Exp1 : Slope Selection by trend type in scatterplots
+  Three main factors:
+      Linear trend
+      Trigonometric trend
+      Quadratic model
+
+ Exp2 : Slope Selection by visualization type
+    Three main factors:
+      Scatterplot
+      Line graph
+      Area chart
+ 
+ Exp3: Intercept Selection by visualization type
+    Three main factors:
+      Scatterplot
+      Line graph
+      Area chart
+ 
+ 
+ */
+
+
+
+var experiment = "Exp3";
 
 var canvasW = 300;
 var canvasH = 525;
@@ -21,7 +47,7 @@ var x = d3.scale.linear()
 var y = d3.scale.linear()
           .domain([0,1])
           .range([canvasH-122.5,122.5])
-          .clamp(true);
+          .clamp(false);
 
 var b = d3.scale.linear()
           .domain([-1,1])
@@ -149,24 +175,25 @@ function task(){
   initialize();
 }
 
-function makeSlope(m){
+function makeSlope(m,yi){
   var xp;
-  switch(svg.selectAll("image").datum().type){
+  switch(stim[questionNum].type){
     case "trig":
+      var bp = yi ? -1*yi/2.0 : 0.0;
       for(var i = 0;i<=resolution;i++){
         xp = i/resolution;
         yp = trigy(-1 * m*Math.cos(trig(xp)));
-        slopeLine[i] = { "x": xp, "y": yp};
+        slopeLine[i] = { "x": xp, "y": yp+parseFloat(bp)};
       }
     break;
     
     case "quad":
-      var bp = b(m);
+      var bp = yi ? b(m)-(yi/2.0) : b(m);
       for(var i = 0;i<=resolution;i++){
         xp = i/resolution;
         yp = ( m * xp * xp);
         if(m!=0){
-          yp = ( m * xp * xp + bp);
+          yp = ( m * xp * xp + parseFloat(bp));
         }
         else{
           yp = 0.5;
@@ -178,11 +205,10 @@ function makeSlope(m){
       
     default:
     case "linear":
-      var bp = b(m);
- 
+      var bp = yi ? b(m)-(yi/2.0) : b(m);
       for(var i = 0;i<=resolution;i++){
         xp = i/resolution;
-        yp = m*xp + bp;
+        yp = m*xp + parseFloat(bp);
         slopeLine[i] = { "x": xp, "y": yp};
       }
     break;
@@ -190,7 +216,12 @@ function makeSlope(m){
 }
 
 function slope(){
-  makeSlope(this.value);
+  if(experiment=="Exp3"){
+    makeSlope(parseFloat(stim[questionNum].m) * stim[questionNum].sign,this.value);
+  }
+  else{
+    makeSlope(this.value);
+  }
   svgLine.datum(slopeLine)
           .attr("d",lineFunc);
   
@@ -198,21 +229,27 @@ function slope(){
 }
 
 function initialize(){
-  makeSlope(0);
+  if(experiment=="Exp3"){
+    makeSlope(parseFloat(stim[questionNum].m) * stim[questionNum].sign);
+  }
+  else{
+    makeSlope(0);
+  }
   svgLine.datum(slopeLine)
     .attr("d",lineFunc);
   d3.select("#slope").node().value = 0;
   d3.select("#questionNum").html((questionNum+1)+"/"+questionMax);
   d3.select("#answer").attr("disabled","true");
-  svg.select("image").datum(stim[questionNum]).attr("xlink:href",function(d){ return d.src;});
+  svg.select("image").datum(stim[questionNum]).attr("xlink:href",function(d){ return d.src;}).attr("y",function(d){return y(d.offset)-y(0);});
   starttime = (new Date()).getTime();
 }
 
 function answer(){
   var rt = (new Date()).getTime() - startTime;
-  var actual = parseFloat(stim[questionNum].sign)*stim[questionNum].m;
-  var answer = d3.select("#slope").node().value;
+  var actual = experiment=="Exp3" ? parseFloat(stim[questionNum].offset) : parseFloat(stim[questionNum].sign)*stim[questionNum].m;
+  var answer = experiment=="Exp3" ? -1*d3.select("#slope").node().value/2.0 : d3.select("#slope").node().value;
   var error = d3.format(".2f")(actual-answer);
+  console.log(stim[questionNum].offset);
   console.log("Actual:" + actual + " answered:"+answer + " error:"+error);
   stim[questionNum].answer = answer;
   stim[questionNum].error = error;
@@ -261,6 +298,7 @@ function genStim(){
   var typeIndex;
   var numRegular = graphtypes.length*ms.length*sigmas.length*ss.length;
   
+  var maxOffset = experiment=="Exp3" ? 0.25 : 0;
   //Add blocked factors
   for(var graph of graphtypes){
     for(var m of ms){
@@ -283,6 +321,7 @@ function genStim(){
           theStim[i].isValidation = "false";
           theStim[i].id = workerId;
           theStim[i].graphtype = graph;
+          theStim[i].offset = d3.format(".2f")((Math.random()*(2*maxOffset))-maxOffset);
           i++;
           
         }
@@ -307,8 +346,9 @@ function genStim(){
     theStim[i].m = m;
     theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"trend/S"+sigma+"m"+s+m+".png";
     theStim[i].isValidation = "true";
-    theStim[i].graphtype = graph;
     theStim[i].id = workerId;
+    theStim[i].graphtype = graph;
+    theStim[i].offset = 0;
     i++;
   }
   
