@@ -313,17 +313,20 @@ function genStim(){
   var i = 0;
   
   var numEachType = experiment=="Exp4" ? [0,0,0,0] : [0,0,0];
+  var numEachSign = [0,0];
+  var signIndex;
   var typeIndex;
-  var numRegular = experiment=="Exp4" ? sigmas.length*ss.length*outlierLocs.length*outlierNum.length : graphtypes.length*ms.length*sigmas.length*ss.length;
+  var numRegular = graphtypes.length*sigmas.length*ms.length*outlierNum.length;
   var maxOffset = experiment=="Exp3" ? 0.25 : 0;
   var name;
   var ndata;
   //Add blocked factors
-  for(var graph of graphtypes){
-    for(var sigma of sigmas){
-      for(var s of ss){
-        for(var ol of outlierLocs){
+  for(var type of types){
+    for(var graph of graphtypes){
+      for(var sigma of sigmas){
+        for(var m of ms){
           for(var o of outlierNum){
+            ol = "";
             if(experiment=="Exp3"){
               //Type of fit now a random factor, rather than blocked:
               do{
@@ -333,17 +336,21 @@ function genStim(){
               numEachType[typeIndex]++;
             }
             else if(experiment=="Exp4"){
-              //Slope now a random factor, rather than blocked:
+              //Outlier location a random factor
               do{
-                typeIndex = Math.floor(Math.random()*ms.length);
-              }while(numEachType[typeIndex]>(numRegular/4));
-              m = ms[typeIndex];
+                typeIndex = Math.floor(Math.random()*outlierLocs.length);
+              }while(numEachType[typeIndex]>(numRegular/3));
+              ol = outlierLocs[typeIndex];
               numEachType[typeIndex]++;
               type = types[0];
             }
-            else{
-              type = types[0];
-            }
+            
+            //Sign also a random factor
+            do{
+              signIndex = Math.floor(Math.random()*ss.length);
+            }while(numEachSign[signIndex]>(numRegular/2));
+            s = ss[signIndex];
+            numEachSign[signIndex]++;
             
             theStim[i] = {};
             theStim[i].sigma = sigma;
