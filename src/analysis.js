@@ -2,7 +2,8 @@ var data;
 var experiment = "Exp2";
 var demo = "exp2demo";
 var raw = "exp2";
-process();
+var clean = "exp1clean";
+analysis();
 
 function process(){
   //Steps:
@@ -59,6 +60,6 @@ function cleanRows(rows,index){
 }
 
 function analysis(){
-  
+  data = dl.csv("./"+clean+".csv");
 }
 

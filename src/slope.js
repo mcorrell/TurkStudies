@@ -24,7 +24,8 @@
 
 
 
-var experiment = "Exp3";
+var experiment = "Exp4";
+var metadata;
 
 var canvasW = 300;
 var canvasH = 525;
@@ -121,11 +122,16 @@ function  tutorial(){
 function finishTutorial(){
   main.selectAll("#answer").remove();
   main.selectAll("iframe").remove();
-  task();
+  
+  if(experiment=="Exp4"){
+    d3.csv("data/"+experiment+"/metadata.csv", function(data){ metadata = data; task();});
+  }
+  else{
+    task();
+  }
 }
 
 function task(){
-
   //Create stimuli
   stim = genStim();
   
@@ -172,6 +178,7 @@ function task(){
     .attr("width",canvasW)
     .attr("xlink:href",function(d){ return d.src;});
   svgLine = svg.append("path").attr("class","trend");
+  
   initialize();
 }
 
@@ -209,6 +216,9 @@ function makeSlope(m,yi){
       for(var i = 0;i<=resolution;i++){
         xp = i/resolution;
         yp = m*xp + parseFloat(bp);
+        if(experiment=="Exp4" && stim[questionNum].ix && stim[questionNum].iy){
+          yp= (m*(xp-stim[questionNum].ix))+(stim[questionNum].iy);
+        }
         slopeLine[i] = { "x": xp, "y": yp};
       }
     break;
@@ -224,6 +234,7 @@ function slope(){
   }
   svgLine.datum(slopeLine)
           .attr("d",lineFunc);
+  
   
   d3.select("#answer").attr("disabled",null);
 }
@@ -241,7 +252,9 @@ function initialize(){
   d3.select("#questionNum").html((questionNum+1)+"/"+questionMax);
   d3.select("#answer").attr("disabled","true");
   svg.select("image").datum(stim[questionNum]).attr("xlink:href",function(d){ return d.src;}).attr("y",function(d){return y(d.offset)-y(0);});
+  
   starttime = (new Date()).getTime();
+  
 }
 
 function answer(){
@@ -249,13 +262,16 @@ function answer(){
   var actual = experiment=="Exp3" ? parseFloat(stim[questionNum].offset) : parseFloat(stim[questionNum].sign)*stim[questionNum].m;
   var answer = experiment=="Exp3" ? -1*d3.select("#slope").node().value/2.0 : d3.select("#slope").node().value;
   var error = d3.format(".2f")(actual-answer);
-  console.log(stim[questionNum].offset);
-  console.log("Actual:" + actual + " answered:"+answer + " error:"+error);
   stim[questionNum].answer = answer;
   stim[questionNum].error = error;
   stim[questionNum].unsignedError = Math.abs(error);
+  if(experiment=="Exp4"){
+    stim[questionNum].errorActual = d3.format(".2f")(stim[questionNum].actualm - answer);
+    stim[questionNum].unsignedErrorActual = Math.abs(stim[questionNum].errorActual);
+  }
+    console.log("Actual:" + actual + " Actual w/ outlier:" + stim[questionNum].actualm + " answered:"+answer + " error:"+error+" w/outlier error:"+stim[questionNum].errorActual);
   stim[questionNum].index = questionNum;
-  writeAnswer();
+   writeAnswer();
 }
 
 function writeAnswer(){
@@ -288,42 +304,70 @@ function genStim(){
   var ss = ["-",""];
   
   var sigmas = ["0.05","0.1","0.15","0.2"];
-  var types = ["line","trig","quad"];
-  var graphtypes = experiment=="Exp1" ? ["scatter"] : ["scatter","area","line"];
+  var types = experiment=="Exp4" ? ["line"] : ["line","trig","quad"];
+  var graphtypes = (experiment=="Exp1" || experiment=="Exp4") ? ["scatter"] : ["scatter","area","line"];
+  var outlierLocs = experiment=="Exp4" ? ["b","m","e"] : [""];
+  var outlierNum = experiment=="Exp4" ? ["0","5","10","15"] : [""];
   
   var numValidation = 4;
   var i = 0;
   
-  var numEachType = [0,0,0];
+  var numEachType = experiment=="Exp4" ? [0,0,0,0] : [0,0,0];
   var typeIndex;
-  var numRegular = graphtypes.length*ms.length*sigmas.length*ss.length;
-  
+  var numRegular = experiment=="Exp4" ? sigmas.length*ss.length*outlierLocs.length*outlierNum.length : graphtypes.length*ms.length*sigmas.length*ss.length;
   var maxOffset = experiment=="Exp3" ? 0.25 : 0;
+  var name;
+  var ndata;
   //Add blocked factors
   for(var graph of graphtypes){
-    for(var m of ms){
-      for(var sigma of sigmas){
-        for(var s of ss){
-          
-          //Type of fit now a random factor, rather than blocked:
-          do{
-            typeIndex = Math.floor(Math.random()*types.length);
-          }while(numEachType[typeIndex]>(numRegular/3));
-          type = types[typeIndex];
-          numEachType[typeIndex]++;
-          
-          theStim[i] = {};
-          theStim[i].sigma = sigma;
-          theStim[i].sign = s=="-"? "-1":"1";
-          theStim[i].type = type;
-          theStim[i].m = m;
-          theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"/S"+sigma+"m"+s+m+".png";
-          theStim[i].isValidation = "false";
-          theStim[i].id = workerId;
-          theStim[i].graphtype = graph;
-          theStim[i].offset = d3.format(".2f")((Math.random()*(2*maxOffset))-maxOffset);
-          i++;
-          
+    for(var sigma of sigmas){
+      for(var s of ss){
+        for(var ol of outlierLocs){
+          for(var o of outlierNum){
+            if(experiment=="Exp3"){
+              //Type of fit now a random factor, rather than blocked:
+              do{
+                typeIndex = Math.floor(Math.random()*types.length);
+              }while(numEachType[typeIndex]>(numRegular/3));
+              type = types[typeIndex];
+              numEachType[typeIndex]++;
+            }
+            else if(experiment=="Exp4"){
+              //Slope now a random factor, rather than blocked:
+              do{
+                typeIndex = Math.floor(Math.random()*ms.length);
+              }while(numEachType[typeIndex]>(numRegular/4));
+              m = ms[typeIndex];
+              numEachType[typeIndex]++;
+              type = types[0];
+            }
+            else{
+              type = types[0];
+            }
+            
+            theStim[i] = {};
+            theStim[i].sigma = sigma;
+            theStim[i].sign = s=="-"? "-1":"1";
+            theStim[i].type = type;
+            theStim[i].m = m;
+            name = "S"+sigma+"m"+s+m+"o"+ol+o+".png";
+            theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"/"+name;
+            theStim[i].isValidation = "false";
+            theStim[i].id = workerId;
+            theStim[i].graphtype = graph;
+            theStim[i].offset = d3.format(".2f")((Math.random()*(2*maxOffset))-maxOffset);
+            theStim[i].outlierLoc = ol;
+            theStim[i].outlierNum = o;
+            if(experiment=="Exp4" && o>0){
+              ndata = metadata.find(function(n){ return n.id==name;});
+            }
+            theStim[i].ix = ndata ? parseFloat(ndata.ix) : 0;
+            theStim[i].iy = ndata ? parseFloat(ndata.iy) : 0;
+            theStim[i].actualm = ndata ? parseFloat(ndata.actualm) : m;
+            theStim[i].actualb = ndata ? parseFloat(ndata.actualb) : b(m);
+            ndata = "";
+            i++;
+          }
         }
       }
     }
@@ -344,11 +388,20 @@ function genStim(){
     theStim[i].sign = s=="-"? "-1":"1";
     theStim[i].type = type;
     theStim[i].m = m;
-    theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"trend/S"+sigma+"m"+s+m+".png";
+    var ol = experiment=="Exp4" ? "b" : "";
+    var o = experiment=="Exp4" ? "0" : "";
+    name = "S"+sigma+"m"+s+m+"o"+ol+o+".png";
+    theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"trend/"+name;
     theStim[i].isValidation = "true";
     theStim[i].id = workerId;
     theStim[i].graphtype = graph;
     theStim[i].offset = 0;
+    theStim[i].outlierLoc = "b";
+    theStim[i].outLierNum = "0";
+    theStim[i].ix = 0;
+    theStim[i].iy = 0;
+    theStim[i].actualm = m;
+    theStim[i].actualb = b(m);
     i++;
   }
   
