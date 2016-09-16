@@ -305,15 +305,17 @@ function genStim(){
   
   var sigmas = ["0.05","0.1","0.15","0.2"];
   var types = experiment=="Exp4" ? ["line"] : ["line","trig","quad"];
-  var graphtypes = (experiment=="Exp1" || experiment=="Exp4") ? ["scatter"] : ["scatter","area","line"];
+  var graphtypes = experiment=="Exp1" ? ["scatter"] : ["scatter","area","line"];
   var outlierLocs = experiment=="Exp4" ? ["b","m","e"] : [""];
-  var outlierNum = experiment=="Exp4" ? ["0","5","10","15"] : [""];
+  var outlierNum = experiment=="Exp4" ? ["low","high"] : [""];
   
   var numValidation = 4;
   var i = 0;
   
-  var numEachType = experiment=="Exp4" ? [0,0,0,0] : [0,0,0];
+  var numEachType = [0,0,0];
   var numEachSign = [0,0];
+  var numEachLoc = [0,0,0];
+  var numEachOutlier = [0,0,0,0];
   var signIndex;
   var typeIndex;
   var numRegular = graphtypes.length*sigmas.length*ms.length*outlierNum.length;
@@ -321,60 +323,67 @@ function genStim(){
   var name;
   var ndata;
   //Add blocked factors
-  for(var type of types){
-    for(var graph of graphtypes){
-      for(var sigma of sigmas){
-        for(var m of ms){
-          for(var o of outlierNum){
-            ol = "";
-            if(experiment=="Exp3"){
-              //Type of fit now a random factor, rather than blocked:
-              do{
-                typeIndex = Math.floor(Math.random()*types.length);
-              }while(numEachType[typeIndex]>(numRegular/3));
-              type = types[typeIndex];
-              numEachType[typeIndex]++;
-            }
-            else if(experiment=="Exp4"){
-              //Outlier location a random factor
-              do{
-                typeIndex = Math.floor(Math.random()*outlierLocs.length);
-              }while(numEachType[typeIndex]>(numRegular/3));
-              ol = outlierLocs[typeIndex];
-              numEachType[typeIndex]++;
-              type = types[0];
-            }
-            
-            //Sign also a random factor
+  for(var graph of graphtypes){
+    for(var type of types){
+    for(var sigma of sigmas){
+      for(var m of ms){
+        for(var o of outlierNum){
+          ol = "";
+          if(experiment=="Exp3"){
+            //Type of fit now a random factor, rather than blocked:
             do{
-              signIndex = Math.floor(Math.random()*ss.length);
-            }while(numEachSign[signIndex]>(numRegular/2));
-            s = ss[signIndex];
-            numEachSign[signIndex]++;
-            
-            theStim[i] = {};
-            theStim[i].sigma = sigma;
-            theStim[i].sign = s=="-"? "-1":"1";
-            theStim[i].type = type;
-            theStim[i].m = m;
-            name = "S"+sigma+"m"+s+m+"o"+ol+o+".png";
-            theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"/"+name;
-            theStim[i].isValidation = "false";
-            theStim[i].id = workerId;
-            theStim[i].graphtype = graph;
-            theStim[i].offset = d3.format(".2f")((Math.random()*(2*maxOffset))-maxOffset);
-            theStim[i].outlierLoc = ol;
-            theStim[i].outlierNum = o;
-            if(experiment=="Exp4" && o>0){
-              ndata = metadata.find(function(n){ return n.id==name;});
-            }
-            theStim[i].ix = ndata ? parseFloat(ndata.ix) : 0;
-            theStim[i].iy = ndata ? parseFloat(ndata.iy) : 0;
-            theStim[i].actualm = ndata ? parseFloat(ndata.actualm) : theStim[i].sign*m;
-            theStim[i].actualb = ndata ? parseFloat(ndata.actualb) : b(m);
-            ndata = "";
-            i++;
+              typeIndex = Math.floor(Math.random()*types.length);
+            }while(numEachType[typeIndex]>=(numRegular/3));
+            type = types[typeIndex];
+            numEachType[typeIndex]++;
           }
+          else if(experiment=="Exp4"){
+            //Outlier location a random factor
+            do{
+              typeIndex = Math.floor(Math.random()*outlierLocs.length);
+            }while(numEachLoc[typeIndex]>=(numRegular/3));
+            ol = outlierLocs[typeIndex];
+            numEachLoc[typeIndex]++;
+            
+            //Outlier number is either low (0,5) or high (10,15)
+            do{
+              typeIndex = Math.floor(Math.random()*outlierNum.length);
+              typeIndex = o=="high" ? typeIndex+2 : typeIndex;
+            }while(numEachOutlier[typeIndex]>=(numRegular/4));
+            o = 5*typeIndex;
+            numEachOutlier[typeIndex]++;
+          }
+          
+          //Sign also a random factor
+          do{
+            signIndex = Math.floor(Math.random()*ss.length);
+          }while(numEachSign[signIndex]>=(numRegular/2));
+          s = ss[signIndex];
+          numEachSign[signIndex]++;
+          
+          theStim[i] = {};
+          theStim[i].sigma = sigma;
+          theStim[i].sign = s=="-"? "-1":"1";
+          theStim[i].type = type;
+          theStim[i].m = m;
+          name = "S"+sigma+"m"+s+m+"o"+ol+o+".png";
+          theStim[i].src = "data/"+experiment+"/"+type+"/"+graph+"/"+name;
+          theStim[i].isValidation = "false";
+          theStim[i].id = workerId;
+          theStim[i].graphtype = graph;
+          theStim[i].offset = d3.format(".2f")((Math.random()*(2*maxOffset))-maxOffset);
+          theStim[i].outlierLoc = ol;
+          theStim[i].outlierNum = o;
+          if(experiment=="Exp4" && o>0){
+            ndata = metadata.find(function(n){ return n.id==name;});
+          }
+          theStim[i].ix = ndata ? parseFloat(ndata.ix) : 0;
+          theStim[i].iy = ndata ? parseFloat(ndata.iy) : 0;
+          theStim[i].actualm = ndata ? parseFloat(ndata.actualm) : theStim[i].sign*m;
+          theStim[i].actualb = ndata ? parseFloat(ndata.actualb) : b(m);
+          ndata = "";
+          i++;
+        }
         }
       }
     }
@@ -404,7 +413,7 @@ function genStim(){
     theStim[i].graphtype = graph;
     theStim[i].offset = 0;
     theStim[i].outlierLoc = "b";
-    theStim[i].outLierNum = "0";
+    theStim[i].outlierNum = "0";
     theStim[i].ix = 0;
     theStim[i].iy = 0;
     theStim[i].actualm = m;
