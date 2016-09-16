@@ -363,7 +363,7 @@ function genStim(){
             }
             theStim[i].ix = ndata ? parseFloat(ndata.ix) : 0;
             theStim[i].iy = ndata ? parseFloat(ndata.iy) : 0;
-            theStim[i].actualm = ndata ? parseFloat(ndata.actualm) : m;
+            theStim[i].actualm = ndata ? parseFloat(ndata.actualm) : theStim[i].sign*m;
             theStim[i].actualb = ndata ? parseFloat(ndata.actualb) : b(m);
             ndata = "";
             i++;
